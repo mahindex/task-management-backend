@@ -13,19 +13,28 @@ dotenv.config();
 // 🔹 CONNECT DATABASE
 connectDB();
 
-// 🔹 CREATE EXPRESS APP (MUST BE BEFORE app.use)
+// 🔹 CREATE EXPRESS APP
 const app = express();
 
 // 🔹 MIDDLEWARE
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://task-management-frontend-puce.vercel.app',
+  ],
+}));
 app.use(express.json());
 
-// 🔹 ROUTES
+// 🔹 ROUTES (THIS IS CRITICAL)
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// 🔹 START SERVER
-const PORT = process.env.PORT || 5000;
+// 🔹 ERROR HANDLERS (MUST BE AFTER ROUTES)
+app.use(notFound);
+app.use(errorMiddleware);
+
+// 🔹 START SERVER (RENDER USES 10000)
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
