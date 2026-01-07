@@ -47,18 +47,21 @@ router.post(
 router.post(
   '/login',
   asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password required' });
     }
 
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const match = await bcrypt.compare(password, user.password);
+
     if (!match) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -69,9 +72,18 @@ router.post(
       { expiresIn: '1d' }
     );
 
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   })
 );
+
 
 // ✅ Admin - Get all employees
 router.get(
